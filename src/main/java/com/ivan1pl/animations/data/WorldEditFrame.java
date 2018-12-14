@@ -81,7 +81,7 @@ public class WorldEditFrame implements Serializable, IFrame {
 //Logger.getGlobal().info("world: "+schematic.getClipboard().getRegion().getWorld().toString());
 //Logger.getGlobal().info("worlddata: "+schematic.getClipboard().getRegion().getWorld().getWorldData().toString());
             //show();
-            schematic.save(schemFile, ClipboardFormat.SCHEMATIC);
+            schematic.save(schemFile, ClipboardFormat.STRUCTURE);
         } catch (IOException ex) {
             Logger.getLogger(WorldEditFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -101,7 +101,7 @@ public class WorldEditFrame implements Serializable, IFrame {
             schematic = ClipboardFormat.SCHEMATIC.getReader(inputstream);
             Clipboard board = reader.read(worldData);*/
         try {
-            schematic = ClipboardFormat.SCHEMATIC.load(schemFile);
+            schematic = ClipboardFormat.STRUCTURE.load(schemFile);
             //Region region = schematic.getClipboard().getRegion();
             //region.setWorld(session.getWorld());
             //schematic = new Schematic(region);
