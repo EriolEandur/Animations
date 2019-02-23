@@ -191,18 +191,18 @@ public class Animations {
         ObjectOutputStream ostream = null;
         boolean result = true;
         try {
-            File folder = new File(PLUGIN_DIR, name);
+            /*File folder = new File(PLUGIN_DIR, name);
             if(!folder.exists()) {
                 folder.mkdir();
             }
             File f = new File(folder, "data.anim");
-            Files.deleteIfExists(f.toPath());
-            
+            Files.deleteIfExists(f.toPath());*/
+            File f = new File(PLUGIN_DIR, name + ".anim");
             fstream = new FileOutputStream(f);
             ostream = new ObjectOutputStream(fstream);
             
             //ostream.writeObject(animation);
-            animation.saveTo(folder, ostream);
+            animation.saveTo(f, ostream);
         } catch (IOException ex) {
             Logger.getLogger(Animations.class.getName()).log(Level.SEVERE, null, ex);
             result = false;
@@ -273,9 +273,8 @@ public class Animations {
     
     public static void reloadAnimation(String name) {
         File f = new File(new File(PLUGIN_DIR, name),"data.anim");
-        boolean conversion = false;
         if(!f.exists()) {
-            conversion = true;
+            //conversion = true;
             f = new File(PLUGIN_DIR, name + ".anim");
         }
         FileInputStream fstream = null;
@@ -286,8 +285,8 @@ public class Animations {
 
             Animation animation = (Animation) ostream.readObject();
             
-            
             if (animation != null) {
+                boolean conversion = animation.containsOutdatedFrame();
                 if(conversion) {
                     Logger.getLogger(Animations.class.getName()).log(Level.INFO,"Converting old Animation: "+name);
                 } else {

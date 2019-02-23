@@ -18,23 +18,19 @@
  */
 package com.ivan1pl.animations.data;
 
-import com.boydti.fawe.FaweAPI;
+//import com.boydti.fawe.FaweAPI;
 import com.ivan1pl.animations.constants.Messages;
 import com.ivan1pl.animations.exceptions.InvalidSelectionException;
-import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.bukkit.BukkitUtil;
+//import com.sk89q.worldedit.EditSession;
+//import com.sk89q.worldedit.bukkit.BukkitUtil;
 import java.io.File;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.SerializationUtils;
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 /**
@@ -68,16 +64,16 @@ public class MovingAnimation extends Animation implements Serializable {
     @Setter
     private int maxDistance;
     
-    transient private EditSession session;
+    //transient private EditSession session;
     
     public MovingAnimation(Selection selection) throws InvalidSelectionException {
         if (!Selection.isValid(selection)) {
             throw new InvalidSelectionException();
         }
         this.selection = selection;
-        createSession();
-        frame = WorldEditFrame.fromSelection(selection,session);
-        background = WorldEditFrame.fromSelection(selection,session);
+        //createSession();
+        frame = BlockIdFrame.fromSelection(selection);
+        background = BlockIdFrame.fromSelection(selection);
     }
     
     public void updateBackground() {
@@ -86,7 +82,7 @@ Logger.getGlobal().info("Update Background 1");
 Logger.getGlobal().info("Update Background 2");
         s.expand(stepX*getFrameCount(), stepY*getFrameCount(), stepZ*getFrameCount());
 Logger.getGlobal().info("Update Background 3");
-        background = WorldEditFrame.fromSelection(s,session);
+        background = BlockIdFrame.fromSelection(s);
 Logger.getGlobal().info("Update Background 4");
     }
 
@@ -138,48 +134,48 @@ Logger.getGlobal().info("Update Background 4");
         return background.getCenter();
     }
     
-    @Override
+    /*@Override
     public void saveTo(File folder, ObjectOutputStream out) throws IOException {
         super.saveTo(folder, out);
-        if(background instanceof WorldEditFrame) {
+        if(background instanceof BlockIdFrame) {
             if(!folder.exists()) {
                 folder.mkdir();
             }
-            ((WorldEditFrame)background).saveSchematic(new File(folder,"background.schem"));
+            ((BlockIdFrame)background).save(new File(folder,"background.schem"));
         }
         if(frame instanceof WorldEditFrame) {
             if(!folder.exists()) {
                 folder.mkdir();
             }
-            ((WorldEditFrame)frame).saveSchematic(new File(folder,"frame.schem"));
+            ((BlockIdFrame)frame).save(new File(folder,"frame.schem"));
         }
-    }
+    }*/
     
     @Override
     public boolean prepare(File folder) {
-        if(!createSession()) {
+        /*if(!createSession()) {
             Logger.getLogger(MovingAnimation.class.getName()).log(Level.WARNING,
                              "Error while loading Animation "+folder.getName()+": Missing World");
             return false;
-        }
-        createSession();
-        if(!folder.exists()) {
+        }*/
+        //createSession();
+        /*if(!folder.exists()) {
             folder.mkdir();
+        }*/
+        if(background instanceof BlockIdFrame) {
+            ((BlockIdFrame)background).init();
         }
-        if(background instanceof WorldEditFrame) {
-            ((WorldEditFrame)background).loadSchematic(session, new File(folder,"background.schem"));
-        }
-        if(frame instanceof WorldEditFrame) {
-            ((WorldEditFrame)frame).loadSchematic(session, new File(folder,"frame.schem"));
+        if(frame instanceof BlockIdFrame) {
+            ((BlockIdFrame)frame).init();
         }
         if(background instanceof Frame) {
-            WorldEditFrame update = WorldEditFrame.fromSelection(background.toSelection(),session);
+            BlockIdFrame update = BlockIdFrame.fromSelection(background.toSelection());
             //update.saveSchematic(new File(folder,"background.schem"));
             update.setBlocks(((Frame)background).getBlockMaterials(),((Frame)background).getBlockData());
             background = update;
         }
         if(frame instanceof Frame) {
-            WorldEditFrame update = WorldEditFrame.fromSelection(frame.toSelection(),session);
+            BlockIdFrame update = BlockIdFrame.fromSelection(frame.toSelection());
             update.setBlocks(((Frame)frame).getBlockMaterials(),((Frame)frame).getBlockData());
             //update.saveSchematic(new File(folder,"frame.schem"));
             frame = update;
@@ -187,7 +183,7 @@ Logger.getGlobal().info("Update Background 4");
         return true;
     }
     
-    private boolean createSession() {
+    /*private boolean createSession() {
         World bukkitWorld = selection.getCenter().getWorld();
         if(bukkitWorld==null) {
             return false;
@@ -195,6 +191,10 @@ Logger.getGlobal().info("Update Background 4");
         com.sk89q.worldedit.world.World world = BukkitUtil.getLocalWorld(bukkitWorld);
         session = FaweAPI.getEditSessionBuilder(world).build();
         return true;
-    }
-
+    }*/
+    
+    @Override
+    public boolean containsOutdatedFrame() {
+        return frame.isOutdated() || background.isOutdated();
+    }   
 }

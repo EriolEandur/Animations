@@ -18,21 +18,16 @@
  */
 package com.ivan1pl.animations.data;
 
-import com.boydti.fawe.FaweAPI;
+//import com.boydti.fawe.FaweAPI;
 import com.ivan1pl.animations.exceptions.InvalidSelectionException;
-import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.bukkit.BukkitUtil;
+//import com.sk89q.worldedit.EditSession;
+//import com.sk89q.worldedit.bukkit.BukkitUtil;
 import java.io.File;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import lombok.Getter;
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 /**
@@ -48,18 +43,18 @@ public class StationaryAnimation extends Animation implements Serializable {
     @Getter
     private final Selection selection;
     
-    transient private EditSession session;
+    //transient private EditSession session;
     
     public StationaryAnimation(Selection selection) throws InvalidSelectionException {
         if (!Selection.isValid(selection)) {
             throw new InvalidSelectionException();
         }
         this.selection = selection;
-        createSession();
+        //createSession();
     }
     
     public void addFrame() {
-        IFrame f = WorldEditFrame.fromSelection(selection,session);
+        IFrame f = BlockIdFrame.fromSelection(selection);
         frames.add(f);
     }
     
@@ -122,11 +117,11 @@ public class StationaryAnimation extends Animation implements Serializable {
             return false;
         }
 
-        frames.set(index, WorldEditFrame.fromSelection(selection,session));
+        frames.set(index, BlockIdFrame.fromSelection(selection));
         return true;
     }
     
-    @Override
+    /*@Override
     public void saveTo(File folder, ObjectOutputStream out) throws IOException {
         super.saveTo(folder, out);
         if(frames.size()>0 && frames.get(0) instanceof WorldEditFrame) {
@@ -137,28 +132,28 @@ public class StationaryAnimation extends Animation implements Serializable {
                 ((WorldEditFrame)frames.get(i)).saveSchematic(new File(folder,"frame_"+i+".schem"));
             }
         }
-    }
+    }*/
    
     @Override
     public boolean prepare(File folder) {
-        if(!createSession()) {
+        /*if(!createSession()) {
             Logger.getLogger(MovingAnimation.class.getName()).log(Level.WARNING,
                              "Error while loading Animation "+folder.getName()+": Missing World");
             return false;
-        }
-        if(!folder.exists()) {
+        }*/
+        /*if(!folder.exists()) {
             folder.mkdir();
-        }
+        }*/
         for(int i=0;i<frames.size();i++) {
             IFrame frame = frames.get(i);
-            if(frame instanceof WorldEditFrame) {
-                ((WorldEditFrame)frame).loadSchematic(session, new File(folder,"frame_"+i+".schem"));
+            if(frame instanceof BlockIdFrame) {
+                ((BlockIdFrame)frame).init();
             }
         }
         for(int i=0;i<frames.size();i++) {
             IFrame frame = frames.get(i);
             if(frame instanceof Frame) {
-                WorldEditFrame update = WorldEditFrame.fromSelection(frame.toSelection(),session);
+                BlockIdFrame update = BlockIdFrame.fromSelection(frame.toSelection());
                 //update.saveSchematic(new File(folder,"frame_"+i+".schem"));
                 update.setBlocks(((Frame)frame).getBlockMaterials(),((Frame)frame).getBlockData());
                 frames.set(i, update);
@@ -167,7 +162,7 @@ public class StationaryAnimation extends Animation implements Serializable {
         return true;
     }
     
-    private boolean createSession() {
+    /*private boolean createSession() {
         World bukkitWorld = selection.getCenter().getWorld();
         if(bukkitWorld==null) {
             return false;
@@ -175,7 +170,15 @@ public class StationaryAnimation extends Animation implements Serializable {
         com.sk89q.worldedit.world.World world = BukkitUtil.getLocalWorld(bukkitWorld);
         session = FaweAPI.getEditSessionBuilder(world).build();
         return true;
-    }
+    }*/
 
+    @Override
+    public boolean containsOutdatedFrame() {
+        boolean result = false;
+        for(IFrame frame: frames) {
+            result = result || frame.isOutdated();
+        }
+        return result;
+    }   
     
 }
