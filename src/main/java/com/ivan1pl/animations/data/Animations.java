@@ -292,8 +292,17 @@ public class Animations {
                 } else {
                     Logger.getLogger(Animations.class.getName()).log(Level.INFO,"Loading Animation: "+name);
                 }
-                if(!animation.prepare(new File(PLUGIN_DIR, name))) {
-                    Logger.getLogger(Animations.class.getName()).log(Level.WARNING,"Error while preparing Animation: "+name);
+                try {
+                    if(!animation.prepare(new File(PLUGIN_DIR, name))) {
+                        Logger.getLogger(Animations.class.getName()).log(Level.WARNING,"Error while preparing Animation: "+name);
+                        return;
+                    }
+                }catch(NullPointerException ex) {
+                    File newFile = new File(f.getParent(),f.getName()+"_invalid");
+                    f.renameTo(newFile);
+                    Logger.getLogger(Animations.class.getName()).log(Level.WARNING,"Removed Animation: "
+                                     +name+" as there was no matching world on the server."
+                                     +"Data file was renamed to *_invalid");
                     return;
                 }
                 Animation oldAnimation = animations.get(name);
